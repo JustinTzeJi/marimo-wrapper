@@ -84,7 +84,6 @@ async def __():
     import lxml
     import html5lib
     import bs4
-
     return (
         asyncio,
         bs4,
@@ -136,12 +135,27 @@ def __(mo, pandas):
         & (~folders.href.isin(["/Thevesh/charts/commits/main/", None]))
     ]
 
+    folder_dict = {}
+
+    for fold_ in filtered_folder.name:
+        folder_dict[fold_.split("_",1)[1].replace("_"," ")] = fold_
+
+    default_folder = filtered_folder.name.iloc[0].split("_",1)[1].replace("_"," ")
+
     dropdown2 = mo.ui.dropdown(
-        options=filtered_folder.name,
-        value=filtered_folder.name.iloc[0],
+        options= folder_dict,
+        value= default_folder,
         label="Select a Project:",
     )
-    return dropdown2, filtered_folder, folders, list_folder
+    return (
+        default_folder,
+        dropdown2,
+        filtered_folder,
+        fold_,
+        folder_dict,
+        folders,
+        list_folder,
+    )
 
 
 @app.cell
@@ -189,9 +203,7 @@ def __(pandas, re, requests, sleep):
                         f2.truncate(0)
                         f2.write(r2.content)
 
-        url = (
-            f"https://raw.githubusercontent.com/Thevesh/charts/main/{d_value}/script.py"
-        )
+        url = f"https://raw.githubusercontent.com/Thevesh/charts/main/{d_value}/script.py"
         output = "module_thevcharts.py"
         r = requests.get(url)
 
@@ -210,14 +222,15 @@ def __(pandas, re, requests, sleep):
             )
 
         if d_value == "2024-03-03_mmr":
-            script_proxy = script_proxy.replace(
-                """    # ALT-text
-        ALT = 1
-        if ALT == 1:
-            print(ax.get_title())
-            for i in range(len(df)): print(f'{df.index[i]:%Y}: {df["rate"].iloc[i]:,.1f}')""",
-                "",
-            )
+        #     script_proxy = script_proxy.replace(
+        #         """# ALT-text
+        # ALT = 1
+        # if ALT == 1:
+        #     print(ax.get_title())
+        #     for i in range(len(df)): print(f'{df.index[i]:%Y}: {df["rate"].iloc[i]:,.1f}')""",
+        #         """print(df)""",
+        #     )
+            script_proxy = script_proxy.replace("""df = pd.read_parquet(URL).set_index('date')""", """df = pd.read_parquet(URL)\n    df['date'] = pd.to_datetime(df['date'])\n    df = df.set_index('date')""")
 
         if d_value == "2024-03-22_lfpr":
             url_lfpr = f"https://raw.githubusercontent.com/Thevesh/charts/main/{d_value}/lfpr.xlsx"
@@ -234,7 +247,9 @@ def __(pandas, re, requests, sleep):
             )
 
         if d_value == "2024-05-01_income_distributions":
-            script_proxy = script_proxy.replace("""if __name__ == '__main__':""", "")
+            script_proxy = script_proxy.replace(
+                """if __name__ == '__main__':""", ""
+            )
             script_proxy = script_proxy.replace(
                 """    # ----- Household Income (DOSM) -----""",
                 "def household_income():",
@@ -250,7 +265,9 @@ def __(pandas, re, requests, sleep):
             script_proxy += "    return plt.gcf()"
 
         if d_value == "2024-05-12_byelection":
-            script_proxy = script_proxy.replace("ncols=len(order)", "ncol=len(order)")
+            script_proxy = script_proxy.replace(
+                "ncols=len(order)", "ncol=len(order)"
+            )
         if d_value == "2024-06-10_diesel":
             script_proxy = script_proxy.replace(
                 "df['proportion'] = (df.diesel / df.total) * 100",
@@ -270,8 +287,7 @@ def __(pandas, re, requests, sleep):
         # print(options)
 
         return True, options
-
-    return (initiate_folder,)
+    return initiate_folder,
 
 
 @app.cell
@@ -285,10 +301,16 @@ def __(dropdown2, initiate_folder, mo, re_dict, replace_dict, sys):
         else:
             exec("importlib.reload(sys.modules['module_thevcharts'])")
 
+        options_dict = {}
+        for opt_ in options:
+            options_dict[opt_.replace("()","").replace("_"," ")] = opt_
+
+        default_opt = options[0].replace("()","").replace("_"," ")
+        
         dropdown = mo.ui.dropdown(
-            options=options, value=options[0], label="Select a function to run :"
+            options=options_dict, value=default_opt, label="Select a function to run :"
         )
-    return dled, dropdown, options
+    return default_opt, dled, dropdown, opt_, options, options_dict
 
 
 @app.cell
@@ -344,17 +366,19 @@ def __(
     dropdown2,
     dropdown3,
     dropdown4,
+    mo,
 ):
-    if dropdown2.value == "2024-05-26_ev":
-        if dropdown.value == "bar_fueltype_top15()":
-            func_out = f'{dropdown.value.replace(")","")}{drop3_label}="{dropdown3.value}", {drop4_label}="{dropdown4.value}")'
+    with mo.redirect_stdout():
+        if dropdown2.value == "ev":
+            if dropdown.value == "bar fueltype top15":
+                func_out = f'{dropdown.value.replace(")","")}{drop3_label}="{dropdown3.value}", {drop4_label}="{dropdown4.value}")'
+            elif dropdown.value == "bar fueltype":
+                func_out = f'{dropdown.value.replace(")","")}{drop3_label}={dropdown3.value})'
+            else:
+                func_out = f'{dropdown.value.replace(")","")}{drop3_label}="{dropdown3.value}")'
+            fig2 = eval("module_thevcharts." + func_out)
         else:
-            func_out = (
-                f'{dropdown.value.replace(")","")}{drop3_label}="{dropdown3.value}")'
-            )
-        fig2 = eval("module_thevcharts." + func_out)
-    else:
-        fig2 = eval("module_thevcharts." + dropdown.value)
+            fig2 = eval("module_thevcharts." + dropdown.value)
     return fig2, func_out
 
 
