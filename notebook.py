@@ -1,6 +1,6 @@
 import marimo
 
-__generated_with = "0.7.4-dev2"
+__generated_with = "0.8.13"
 app = marimo.App()
 
 
@@ -138,13 +138,15 @@ def __(mo, pandas):
     folder_dict = {}
 
     for fold_ in filtered_folder.name:
-        folder_dict[fold_.split("_",1)[1].replace("_"," ")] = fold_
+        folder_dict[fold_.split("_", 1)[1].replace("_", " ")] = fold_
 
-    default_folder = filtered_folder.name.iloc[0].split("_",1)[1].replace("_"," ")
+    default_folder = (
+        filtered_folder.name.iloc[0].split("_", 1)[1].replace("_", " ")
+    )
 
     dropdown2 = mo.ui.dropdown(
-        options= folder_dict,
-        value= default_folder,
+        options=folder_dict,
+        value=default_folder,
         label="Select a Project:",
     )
     return (
@@ -213,7 +215,7 @@ def __(pandas, re, requests, sleep):
             script_proxy = re.sub(k, v, script_proxy)
 
         for kr, vr in replace_dict.items():
-            script_proxy = script_proxy.replace(k, v)
+            script_proxy = script_proxy.replace(kr, vr)
 
         if d_value == "2024-02-14_valentines":
             script_proxy = script_proxy.replace(
@@ -222,15 +224,18 @@ def __(pandas, re, requests, sleep):
             )
 
         if d_value == "2024-03-03_mmr":
-        #     script_proxy = script_proxy.replace(
-        #         """# ALT-text
-        # ALT = 1
-        # if ALT == 1:
-        #     print(ax.get_title())
-        #     for i in range(len(df)): print(f'{df.index[i]:%Y}: {df["rate"].iloc[i]:,.1f}')""",
-        #         """print(df)""",
-        #     )
-            script_proxy = script_proxy.replace("""df = pd.read_parquet(URL).set_index('date')""", """df = pd.read_parquet(URL)\n    df['date'] = pd.to_datetime(df['date'])\n    df = df.set_index('date')""")
+            #     script_proxy = script_proxy.replace(
+            #         """# ALT-text
+            # ALT = 1
+            # if ALT == 1:
+            #     print(ax.get_title())
+            #     for i in range(len(df)): print(f'{df.index[i]:%Y}: {df["rate"].iloc[i]:,.1f}')""",
+            #         """print(df)""",
+            #     )
+            script_proxy = script_proxy.replace(
+                """df = pd.read_parquet(URL).set_index('date')""",
+                """df = pd.read_parquet(URL)\n    df['date'] = pd.to_datetime(df['date'])\n    df = df.set_index('date')""",
+            )
 
         if d_value == "2024-03-22_lfpr":
             url_lfpr = f"https://raw.githubusercontent.com/Thevesh/charts/main/{d_value}/lfpr.xlsx"
@@ -303,12 +308,14 @@ def __(dropdown2, initiate_folder, mo, re_dict, replace_dict, sys):
 
         options_dict = {}
         for opt_ in options:
-            options_dict[opt_.replace("()","").replace("_"," ")] = opt_
+            options_dict[opt_.replace("()", "").replace("_", " ")] = opt_
 
-        default_opt = options[0].replace("()","").replace("_"," ")
-        
+        default_opt = options[0].replace("()", "").replace("_", " ")
+
         dropdown = mo.ui.dropdown(
-            options=options_dict, value=default_opt, label="Select a function to run :"
+            options=options_dict,
+            value=default_opt,
+            label="Select a function to run :",
         )
     return default_opt, dled, dropdown, opt_, options, options_dict
 
