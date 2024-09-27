@@ -178,6 +178,7 @@ def __():
         "len(tf[tf.maker == 'PROTON'])": "len(tf[tf.maker == 'Proton'])",
         "len(tf[tf.maker == 'PERODUA'])": "len(tf[tf.maker == 'Perodua'])",
         "https://storage.data.gov.my/catalogue/": "https://storage.data.gov.my/transportation/",
+        "ncols=": "ncol=",
     }
     return re_dict, replace_dict
 
