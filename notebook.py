@@ -196,9 +196,9 @@ def __(pandas, re, requests, sleep):
                 sleep(2)
                 print("Connection issues. Retrying ...")
 
-        if df_files.Name.str[-4:].isin([".csv", "xlsx"]).any():
+        if df_files.Name.str[-4:].isin([".csv", "xlsx", "quet"]).any():
             for files_ in df_files.Name:
-                if files_[-4:] in [".csv", "xlsx"]:
+                if files_[-4:] in [".csv", "xlsx", "quet"]:
                     r2 = requests.get(
                         f"https://raw.githubusercontent.com/Thevesh/charts/main/{d_value}/{files_}"
                     )
